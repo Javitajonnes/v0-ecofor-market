@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ecofor_postgres
+    environment:
+      POSTGRES_DB: ecoformarket
+      POSTGRES_USER: ecofor_user
+      POSTGRES_PASSWORD: ecofor_pass_2024
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecofor_user -d ecoformarket"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - ecofor_network
+
+  # Opcional: PgAdmin para gestión visual de la base de datos
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ecofor_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ecoformarket.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - "5050:5050"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - ecofor_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  ecofor_network:
+    driver: bridge

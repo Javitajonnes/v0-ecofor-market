@@ -2,9 +2,14 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { CartItem, Product, UserRole } from './types'
+import { CartItem, Product, UserRole, User } from './types'
 
 interface StoreState {
+  user: User | null
+  isAuthenticated: boolean
+  login: (user: User) => void
+  logout: () => void
+  
   userRole: UserRole
   setUserRole: (role: UserRole) => void
   cart: CartItem[]
@@ -19,6 +24,20 @@ interface StoreState {
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+      login: (user) => set({ 
+        user, 
+        isAuthenticated: true,
+        userRole: user.role 
+      }),
+      logout: () => set({ 
+        user: null, 
+        isAuthenticated: false,
+        userRole: 'guest',
+        cart: [] 
+      }),
+      
       userRole: 'guest',
       setUserRole: (role) => set({ userRole: role }),
       cart: [],
