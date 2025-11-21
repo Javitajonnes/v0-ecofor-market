@@ -151,21 +151,22 @@ Header actualizado con menú de usuario autenticado.
 
 ## Seguridad
 
-### Actual (Development)
-- JWT con secret configurable
-- Cookies HTTP-only
-- Validación de roles
-- Contraseñas en texto plano (SOLO DEMO)
+### Actual (Implementado)
+- ✅ Integrado con PostgreSQL
+- ✅ Hash de contraseñas con bcrypt (12 rounds)
+- ✅ JWT con secret configurable
+- ✅ Cookies HTTP-only
+- ✅ Validación de roles
+- ✅ Mapeo de roles (BD ↔ Frontend)
+- ✅ Consultas a base de datos real
 
-### Producción (TODO)
-- [ ] Integrar con PostgreSQL
-- [ ] Hash de contraseñas con bcrypt
+### Producción (Pendiente)
 - [ ] Refresh tokens
 - [ ] Rate limiting en login
 - [ ] 2FA opcional
 - [ ] Recuperación de contraseña
-- [ ] Variables de entorno seguras
-- [ ] HTTPS obligatorio
+- [ ] Variables de entorno seguras (ya configurado)
+- [ ] HTTPS obligatorio (Vercel lo maneja automáticamente)
 
 ## Integración con Store (Zustand)
 
@@ -192,26 +193,31 @@ interface StoreState {
 # JWT Secret (cambiar en producción)
 JWT_SECRET=ecofor-market-secret-key-change-in-production
 
-# Database (para producción)
-DATABASE_URL=postgresql://user:password@localhost:5432/ecoformarket
+# Database (desarrollo local con Docker)
+DATABASE_URL=postgresql://ecofor_user:ecofor_pass_2024@localhost:5432/ecoformarket
+
+# URL de la aplicación
+NEXTAUTH_URL=http://localhost:3000
 \`\`\`
 
-## Próximos Pasos
+**Nota:** Para producción, usar Neon PostgreSQL y actualizar `DATABASE_URL` en Vercel.
+
+## Estado Actual
 
 ### Base de Datos
-Implementar tabla `users` en PostgreSQL:
+✅ Tabla `users` implementada en PostgreSQL con el schema completo:
+- UUID como ID primario
+- Hash de contraseñas con bcrypt
+- Roles: admin, retail_client, wholesale_client
+- Campos adicionales: RUT, teléfono, dirección, etc.
+- Ver `scripts/migrations/001_initial_schema.sql` para el schema completo
 
-\`\`\`sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'retail', 'wholesale')),
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-\`\`\`
+### Funcionalidades Implementadas
+- ✅ Login con PostgreSQL
+- ✅ Registro con hash bcrypt
+- ✅ Verificación de sesión desde BD
+- ✅ Mapeo automático de roles
+- ✅ Scripts de testing y mantenimiento
 
 ### Funcionalidades Adicionales
 - Recuperación de contraseña por email

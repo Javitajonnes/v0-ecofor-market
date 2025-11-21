@@ -15,9 +15,9 @@ Sistema e-commerce B2B/B2C con gestión de roles, pedidos, cotizaciones y notifi
 
 ### Backend
 - **API**: Next.js API Routes (Route Handlers)
-- **Autenticación**: NextAuth.js v5 (Auth.js)
-- **ORM**: Direct SQL con `@neondatabase/serverless` (compatible PostgreSQL)
-- **Validación**: Zod schemas compartidos
+- **Autenticación**: JWT con cookies HTTP-only
+- **Database Client**: `pg` (node-postgres) para desarrollo local, compatible con `@neondatabase/serverless` para producción
+- **Validación**: Zod schemas compartidos (pendiente implementación completa)
 
 ### Base de Datos
 - **Motor**: PostgreSQL 15+
