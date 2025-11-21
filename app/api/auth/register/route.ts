@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { SignJWT } from 'jose'
+import { getUserByEmail, createUser, formatUserForFrontend } from '@/lib/db/users'
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'ecofor-market-secret-key-change-in-production'
@@ -8,12 +9,24 @@ const JWT_SECRET = new TextEncoder().encode(
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, role } = await request.json()
+    const { 
+      name, 
+      email, 
+      password, 
+      role, 
+      user_type = 'person',
+      rut,
+      phone,
+      address,
+      city,
+      region,
+      company_name
+    } = await request.json()
 
     // Validate input
     if (!name || !email || !password || !role) {
       return NextResponse.json(
-        { error: 'Todos los campos son requeridos' },
+        { error: 'Nombre, email, contraseña y rol son requeridos' },
         { status: 400 }
       )
     }
@@ -27,25 +40,51 @@ export async function POST(request: NextRequest) {
 
     if (!['retail', 'wholesale'].includes(role)) {
       return NextResponse.json(
-        { error: 'Tipo de cliente inválido' },
+        { error: 'Tipo de cliente inválido. Debe ser "retail" o "wholesale"' },
         { status: 400 }
       )
     }
 
-    // In production, check if email exists in PostgreSQL and hash password with bcrypt
-    // For now, simulate successful registration
-    const newUser = {
-      id: Math.random().toString(36).substring(7),
-      name,
-      email,
-      role
+    // Validate RUT (required for Chilean users)
+    if (!rut) {
+      return NextResponse.json(
+        { error: 'RUT es requerido' },
+        { status: 400 }
+      )
     }
+
+    // Check if user already exists
+    const existingUser = await getUserByEmail(email)
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'El email ya está registrado' },
+        { status: 409 }
+      )
+    }
+
+    // Create user in PostgreSQL
+    const userFromDB = await createUser({
+      email,
+      password,
+      name,
+      role: role as 'retail' | 'wholesale',
+      user_type: user_type as 'person' | 'company',
+      rut,
+      phone,
+      address,
+      city,
+      region,
+      company_name: user_type === 'company' ? company_name : undefined,
+    })
+
+    // Format user for frontend
+    const user = formatUserForFrontend(userFromDB)
 
     // Create JWT token
     const token = await new SignJWT({
-      userId: newUser.id,
-      email: newUser.email,
-      role: newUser.role
+      userId: user.id,
+      email: user.email,
+      role: user.role
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -62,10 +101,19 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({
-      user: newUser
+      user
     })
-  } catch (error) {
-    console.error('[v0] Registration error:', error)
+  } catch (error: any) {
+    console.error('[Auth] Registration error:', error)
+    
+    // Handle unique constraint violations
+    if (error.code === '23505') {
+      return NextResponse.json(
+        { error: 'El email o RUT ya está registrado' },
+        { status: 409 }
+      )
+    }
+
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

@@ -1,31 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { SignJWT } from 'jose'
-
-// Mock users database - In production, this would query PostgreSQL
-const MOCK_USERS = [
-  {
-    id: '1',
-    name: 'Administrador',
-    email: 'admin@ecofor.com',
-    password: 'admin123', // In production, use bcrypt
-    role: 'admin' as const
-  },
-  {
-    id: '2',
-    name: 'Cliente Minorista',
-    email: 'retail@ecofor.com',
-    password: 'retail123',
-    role: 'retail' as const
-  },
-  {
-    id: '3',
-    name: 'Cliente Mayorista',
-    email: 'wholesale@ecofor.com',
-    password: 'wholesale123',
-    role: 'wholesale' as const
-  }
-]
+import { getUserByEmail, verifyPassword, formatUserForFrontend } from '@/lib/db/users'
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'ecofor-market-secret-key-change-in-production'
@@ -43,17 +19,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find user - In production, query PostgreSQL with hashed password
-    const user = MOCK_USERS.find(
-      u => u.email === email && u.password === password
-    )
+    // Find user in PostgreSQL
+    const userFromDB = await getUserByEmail(email)
 
-    if (!user) {
+    if (!userFromDB) {
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
       )
     }
+
+    // Verify password
+    const isPasswordValid = await verifyPassword(password, userFromDB.password_hash)
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: 'Credenciales inválidas' },
+        { status: 401 }
+      )
+    }
+
+    // Format user for frontend
+    const user = formatUserForFrontend(userFromDB)
 
     // Create JWT token
     const token = await new SignJWT({
@@ -77,15 +64,10 @@ export async function POST(request: NextRequest) {
 
     // Return user data (without password)
     return NextResponse.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
+      user
     })
   } catch (error) {
-    console.error('[v0] Login error:', error)
+    console.error('[Auth] Login error:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
