@@ -51,3 +51,4 @@ Todos los cambios notables del proyecto serán documentados en este archivo.
 - Middleware de protección de rutas
 - Store de autenticación con Zustand
 
+

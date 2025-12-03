@@ -212,3 +212,4 @@ Cuando estés listo para producción:
 4. Actualizar `DATABASE_URL` en Vercel
 5. ¡Listo! El código funciona igual
 
+
