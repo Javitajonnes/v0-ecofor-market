@@ -25,7 +25,7 @@ Plataforma de comercio electrónico para productos eco-friendly con gestión de 
 - **Frontend**: Next.js 15, React 19, Tailwind CSS v4, shadcn/ui
 - **Backend**: Next.js API Routes (Route Handlers)
 - **Database**: PostgreSQL 15+ (local con Docker, producción en Neon/Supabase)
-- **Auth**: JWT con PostgreSQL (NextAuth.js v5 pendiente)
+- **Auth**: NextAuth.js v5
 - **Estado**: Zustand
 - **PDF**: @react-pdf/renderer
 - **Email**: Resend API
@@ -68,26 +68,23 @@ Esto iniciará:
 - PgAdmin en `http://localhost:5050`
 
 3. **Configurar variables de entorno**
+\`\`\`bash
+cp .env.local.example .env.local
+# Editar .env.local con tus credenciales
+\`\`\`
 
-Crea un archivo `.env.local` en la raíz del proyecto:
-
+Mínimo requerido:
 \`\`\`env
 DATABASE_URL=postgresql://ecofor_user:ecofor_pass_2024@localhost:5432/ecoformarket
-JWT_SECRET=ecofor-market-secret-key-change-in-production
+NEXTAUTH_SECRET=your-secret-key
 NEXTAUTH_URL=http://localhost:3000
 \`\`\`
 
-**Nota:** El archivo `.env.local` no está en el repositorio por seguridad. Debes crearlo manualmente.
-
-4. **Verificar conexión y migraciones**
+4. **Verificar migraciones**
 
 Las migraciones se ejecutan automáticamente al iniciar Docker. Para verificar:
 
 \`\`\`bash
-# Probar conexión (recomendado)
-npm run test:db
-
-# O manualmente
 docker exec -it ecofor_postgres psql -U ecofor_user -d ecoformarket
 \dt  # Listar tablas
 \q   # Salir
@@ -114,9 +111,6 @@ Después del seed automático, puedes usar:
 
 - **[Arquitectura Técnica](./docs/ARCHITECTURE.md)** - Sistema completo, capas y modelo de datos
 - **[Guía de Configuración](./docs/SETUP.md)** - Setup detallado paso a paso
-- **[Setup de Base de Datos](./docs/SETUP_DATABASE.md)** - Configuración de PostgreSQL con Docker
-- **[Opciones de Base de Datos](./docs/DATABASE_OPTIONS.md)** - Análisis de opciones para producción
-- **[Sistema de Autenticación](./docs/AUTH_SYSTEM.md)** - Documentación del sistema de auth
 - **API Reference** _(próximamente)_
 
 ## Estructura del Proyecto
@@ -138,19 +132,13 @@ ecoformarket/
 │   ├── cart-sheet.tsx    # Carrito lateral
 │   └── filters-sidebar.tsx # Filtros
 ├── lib/                   # Utilidades y lógica
-│   ├── db/               # Database utilities (PostgreSQL)
-│   │   ├── index.ts      # Pool de conexiones
-│   │   ├── users.ts      # Funciones de usuarios
-│   │   └── README.md     # Documentación de BD
+│   ├── db/               # Database utilities
 │   ├── services/         # Business logic
 │   ├── types.ts          # TypeScript types
 │   ├── store.ts          # Zustand store
-│   └── mock-data.ts      # Datos de prueba (frontend)
-├── scripts/               # Scripts y utilidades
-│   ├── migrations/       # Migraciones SQL versionadas
-│   ├── test-db-connection.ts  # Test de conexión
-│   ├── test-login.ts     # Test de login
-│   └── fix-passwords.ts  # Regenerar contraseñas
+│   └── mock-data.ts      # Datos de prueba
+├── scripts/               # Scripts SQL
+│   └── migrations/       # Migraciones versionadas
 ├── docs/                  # Documentación técnica
 ├── docker-compose.yml     # PostgreSQL + PgAdmin
 └── package.json
@@ -163,10 +151,6 @@ npm run dev          # Servidor desarrollo (localhost:3000)
 npm run build        # Build producción
 npm start            # Servidor producción
 npm run lint         # ESLint
-npm run test:db      # Probar conexión a PostgreSQL
-npm run test:login   # Probar sistema de login
-npm run fix:passwords # Regenerar contraseñas de usuarios de prueba
-npm run db:migrate   # Ejecutar migraciones manualmente
 \`\`\`
 
 ## Comandos Docker Útiles
@@ -195,10 +179,8 @@ docker exec ecofor_postgres pg_dump -U ecofor_user ecoformarket > backup.sql  # 
 - ✅ Precios diferenciados por rol
 
 ### Fase 2 (En Desarrollo)
-- ✅ Autenticación con PostgreSQL (login, registro, sesión)
-- ✅ Hash de contraseñas con bcrypt
-- ✅ Conexión a base de datos funcional
-- 🔄 API Routes CRUD completo (productos, pedidos)
+- 🔄 Autenticación con NextAuth.js
+- 🔄 API Routes CRUD completo
 - 🔄 Panel de administración
 - 🔄 Gestión de pedidos con estados
 - 🔄 Sistema de cotizaciones
@@ -227,6 +209,19 @@ PostgreSQL Database
 \`\`\`
 
 Ver [ARCHITECTURE.md](./docs/ARCHITECTURE.md) para detalles completos.
+
+## Seguridad
+
+El proyecto implementa múltiples capas de seguridad:
+
+- **Arquitectura separada**: La base de datos SOLO es accesible desde API Routes (servidor)
+- **Autenticación robusta**: Contraseñas hasheadas con bcrypt, JWT para sesiones
+- **Variables de entorno**: Credenciales protegidas y no expuestas al navegador
+- **SQL seguro**: Tagged templates previenen inyecciones SQL automáticamente
+
+El warning de `@neondatabase/serverless` ha sido suprimido porque nuestra arquitectura es completamente segura. Los componentes de cliente usan `fetch()` para llamar a API Routes en el servidor, y nunca acceden directamente a la base de datos.
+
+Ver [SECURITY.md](./docs/SECURITY.md) para detalles completos sobre la arquitectura de seguridad.
 
 ## Modelo de Datos
 

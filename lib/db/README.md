@@ -1,6 +1,6 @@
 # Database Utilities
 
-Utilidades para conexión y operaciones con PostgreSQL.
+Utilidades para conexión y operaciones con PostgreSQL usando `@neondatabase/serverless`.
 
 ## Configuración
 
@@ -8,104 +8,118 @@ Utilidades para conexión y operaciones con PostgreSQL.
 
 Asegúrate de tener configurado `.env.local` con:
 
-```env
+\`\`\`env
 DATABASE_URL=postgresql://ecofor_user:ecofor_pass_2024@localhost:5432/ecoformarket
-```
+\`\`\`
 
 ### Iniciar Base de Datos Local
 
-```bash
+\`\`\`bash
 docker-compose up -d
-```
+\`\`\`
 
-## Uso
+## 🔧 Uso
 
 ### Conexión Básica
 
-```typescript
-import { query } from '@/lib/db'
+
+\`\`\`typescript
+import { getSql } from '@/lib/db'
+
+const sql = getSql()
 
 // Query simple
-const result = await query('SELECT * FROM users WHERE email = $1', [email])
-const users = result.rows
-```
+const users = await sql`SELECT * FROM users`
 
-### Transacciones
-
-```typescript
-import { transaction } from '@/lib/db'
-
-await transaction(async (client) => {
-  await client.query('INSERT INTO orders ...')
-  await client.query('INSERT INTO order_items ...')
-  // Si algo falla, se hace rollback automático
-})
-```
+// Query con parámetros (seguros contra SQL injection)
+const user = await sql`SELECT * FROM users WHERE email = ${email}`
+\`\`\`
 
 ### Verificar Conexión
 
-```typescript
+\`\`\`typescript
 import { testConnection } from '@/lib/db'
 
 const isConnected = await testConnection()
 if (!isConnected) {
   console.error('No se pudo conectar a la base de datos')
 }
-```
+\`\`\`
 
 ## Funciones Disponibles
 
-### `query(text, params?)`
-Ejecuta una query SQL con parámetros preparados.
-
-### `transaction(callback)`
-Ejecuta múltiples queries en una transacción. Si alguna falla, se hace rollback automático.
+### `getSql()`
+Obtiene el cliente SQL de Neon Serverless (singleton).
 
 ### `testConnection()`
 Verifica que la conexión a la base de datos funcione.
 
-### `pool`
-Pool de conexiones de PostgreSQL (uso directo si es necesario).
-
-## Ejemplos
+## 📚 Ejemplos
 
 ### Crear Usuario
 
-```typescript
-import { query } from '@/lib/db'
+
+\`\`\`typescript
+import { getSql } from '@/lib/db'
 import bcrypt from 'bcrypt'
 
+const sql = getSql()
 const passwordHash = await bcrypt.hash(password, 12)
-const result = await query(
-  'INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3) RETURNING *',
-  [email, passwordHash, name]
-)
-const newUser = result.rows[0]
-```
+
+const result = await sql`
+  INSERT INTO users (email, password_hash, name) 
+  VALUES (${email}, ${passwordHash}, ${name}) 
+  RETURNING *
+`
+const newUser = result[0]
+\`\`\`
 
 ### Query con JOIN
 
-```typescript
-import { query } from '@/lib/db'
 
-const result = await query(`
+\`\`\`typescript
+import { getSql } from '@/lib/db'
+
+const sql = getSql()
+const status = 'pending'
+
+const orders = await sql`
   SELECT o.*, u.name as user_name 
   FROM orders o 
   JOIN users u ON o.user_id = u.id 
-  WHERE o.status = $1
-`, ['pending'])
-```
+  WHERE o.status = ${status}
+`
+\`\`\`
+
+### Buscar por ID
+
+
+\`\`\`typescript
+import { getSql } from '@/lib/db'
+
+export async function getUserById(id: string) {
+  const sql = getSql()
+  const result = await sql`
+    SELECT * FROM users WHERE id = ${id} AND is_active = true
+  `
+  return result[0] || null
+}
+\`\`\`
+
+## ⚠️ Importante: Sintaxis de Tagged Templates
+
+Con `@neondatabase/serverless` 1.0+, DEBES usar tagged templates:
+
+\`\`\`typescript
+// ✅ CORRECTO
+const user = await sql`SELECT * FROM users WHERE id = ${userId}`
+
+// ❌ INCORRECTO
+const user = await sql('SELECT * FROM users WHERE id = $1', [userId])
+\`\`\`
+
+Las tagged templates previenen automáticamente SQL injection al interpolar valores de forma segura.
 
 ## Migración a Neon (Producción)
 
-Cuando migres a Neon, solo necesitas cambiar el `DATABASE_URL` en las variables de entorno. El código funciona igual.
-
-Para Neon, puedes usar `@neondatabase/serverless` en lugar de `pg`, pero la API es compatible:
-
-```typescript
-// Con Neon
-import { neon } from '@neondatabase/serverless'
-const sql = neon(process.env.DATABASE_URL!)
-const users = await sql`SELECT * FROM users`
-```
-
+Cuando migres a Neon, solo necesitas cambiar el `DATABASE_URL` en las variables de entorno. El código funciona igual con Neon Cloud o PostgreSQL local en Docker.

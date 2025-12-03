@@ -1,32 +1,32 @@
-import { query } from './index'
-import bcrypt from 'bcrypt'
-import { User } from '../types'
+import { getSql } from "./index"
+import bcrypt from "bcrypt"
+import type { User } from "../types"
 
 // Mapear roles de la BD a roles del frontend
-const mapRoleFromDB = (dbRole: string): User['role'] => {
+const mapRoleFromDB = (dbRole: string): User["role"] => {
   switch (dbRole) {
-    case 'admin':
-      return 'admin'
-    case 'retail_client':
-      return 'retail'
-    case 'wholesale_client':
-      return 'wholesale'
+    case "admin":
+      return "admin"
+    case "retail_client":
+      return "retail"
+    case "wholesale_client":
+      return "wholesale"
     default:
-      return 'guest'
+      return "guest"
   }
 }
 
 // Mapear roles del frontend a roles de la BD
-const mapRoleToDB = (role: User['role']): string => {
+const mapRoleToDB = (role: User["role"]): string => {
   switch (role) {
-    case 'admin':
-      return 'admin'
-    case 'retail':
-      return 'retail_client'
-    case 'wholesale':
-      return 'wholesale_client'
+    case "admin":
+      return "admin"
+    case "retail":
+      return "retail_client"
+    case "wholesale":
+      return "wholesale_client"
     default:
-      return 'retail_client'
+      return "retail_client"
   }
 }
 
@@ -34,7 +34,7 @@ export interface UserFromDB {
   id: string
   email: string
   password_hash: string
-  user_type: 'person' | 'company'
+  user_type: "person" | "company"
   role: string
   name: string
   company_name: string | null
@@ -54,31 +54,24 @@ export interface UserFromDB {
  * Buscar usuario por email
  */
 export async function getUserByEmail(email: string): Promise<UserFromDB | null> {
-  const result = await query(
-    'SELECT * FROM users WHERE email = $1 AND is_active = true',
-    [email]
-  )
-  return result.rows[0] || null
+  const sql = getSql()
+  const result = await sql`SELECT * FROM users WHERE email = ${email} AND is_active = true`
+  return result[0] || null
 }
 
 /**
  * Buscar usuario por ID
  */
 export async function getUserById(id: string): Promise<UserFromDB | null> {
-  const result = await query(
-    'SELECT * FROM users WHERE id = $1 AND is_active = true',
-    [id]
-  )
-  return result.rows[0] || null
+  const sql = getSql()
+  const result = await sql`SELECT * FROM users WHERE id = ${id} AND is_active = true`
+  return result[0] || null
 }
 
 /**
  * Verificar contraseña
  */
-export async function verifyPassword(
-  password: string,
-  hash: string
-): Promise<boolean> {
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash)
 }
 
@@ -97,8 +90,8 @@ export async function createUser(data: {
   email: string
   password: string
   name: string
-  role: 'retail' | 'wholesale'
-  user_type: 'person' | 'company'
+  role: "retail" | "wholesale"
+  user_type: "person" | "company"
   rut: string
   phone?: string
   address?: string
@@ -109,28 +102,27 @@ export async function createUser(data: {
   const passwordHash = await hashPassword(data.password)
   const dbRole = mapRoleToDB(data.role)
 
-  const result = await query(
-    `INSERT INTO users (
+  const sql = getSql()
+  const result = await sql`
+    INSERT INTO users (
       email, password_hash, name, role, user_type, rut, 
       phone, address, city, region, company_name
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-    RETURNING *`,
-    [
-      data.email,
-      passwordHash,
-      data.name,
-      dbRole,
-      data.user_type,
-      data.rut,
-      data.phone || null,
-      data.address || null,
-      data.city || null,
-      data.region || null,
-      data.company_name || null,
-    ]
-  )
+    ) VALUES (
+      ${data.email}, 
+      ${passwordHash}, 
+      ${data.name}, 
+      ${dbRole}, 
+      ${data.user_type}, 
+      ${data.rut}, 
+      ${data.phone || null}, 
+      ${data.address || null}, 
+      ${data.city || null}, 
+      ${data.region || null}, 
+      ${data.company_name || null}
+    )
+    RETURNING *`
 
-  return result.rows[0]
+  return result[0]
 }
 
 /**
@@ -144,4 +136,3 @@ export function formatUserForFrontend(user: UserFromDB): User {
     role: mapRoleFromDB(user.role),
   }
 }
-

@@ -29,18 +29,18 @@ PostgreSQL serverless diseñado específicamente para Vercel y Next.js. Auto-sca
 ❌ **Vendor lock-in**: Dependes de Neon (aunque es PostgreSQL estándar)  
 
 ### Librería Cliente
-```bash
+\`\`\`bash
 npm install @neondatabase/serverless
-```
+\`\`\`
 
 **Código de ejemplo:**
-```typescript
+\`\`\`typescript
 import { neon } from '@neondatabase/serverless'
 
 const sql = neon(process.env.DATABASE_URL!)
 
 const users = await sql`SELECT * FROM users WHERE email = ${email}`
-```
+\`\`\`
 
 ### Precio
 - **Free**: 0.5GB storage, 10GB transfer
@@ -74,13 +74,13 @@ PostgreSQL completo con extras: Auth, Storage, Realtime, Edge Functions.
 ❌ **Menos "serverless"**: Más tradicional que Neon  
 
 ### Librería Cliente
-```bash
+\`\`\`bash
 npm install @supabase/supabase-js
 # O usar @neondatabase/serverless (compatible)
-```
+\`\`\`
 
 **Código de ejemplo:**
-```typescript
+\`\`\`typescript
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -89,7 +89,7 @@ const supabase = createClient(
 )
 
 const { data } = await supabase.from('users').select('*').eq('email', email)
-```
+\`\`\`
 
 ### Precio
 - **Free**: 500MB database, 1GB storage, 2GB bandwidth
@@ -122,16 +122,16 @@ PostgreSQL gestionado directamente por Vercel. Integración nativa.
 ❌ **Menos documentación**: Comparado con Neon/Supabase  
 
 ### Librería Cliente
-```bash
+\`\`\`bash
 npm install @vercel/postgres
-```
+\`\`\`
 
 **Código de ejemplo:**
-```typescript
+\`\`\`typescript
 import { sql } from '@vercel/postgres'
 
 const users = await sql`SELECT * FROM users WHERE email = ${email}`
-```
+\`\`\`
 
 ### Precio
 - **Hobby**: $20/mes - 256MB storage
@@ -162,10 +162,10 @@ PostgreSQL en Railway, fácil de usar y con buen free tier.
 ❌ **Costo variable**: Puede subir con uso  
 
 ### Librería Cliente
-```bash
+\`\`\`bash
 npm install pg
 # O @neondatabase/serverless (compatible)
-```
+\`\`\`
 
 ### Precio
 - **Free**: $5 crédito/mes
@@ -197,10 +197,10 @@ PostgreSQL en Docker para desarrollo, y en producción usar servicio cloud.
 ❌ **Tiempo**: Requiere más tiempo de setup  
 
 ### Librería Cliente
-```bash
+\`\`\`bash
 npm install pg
 # O @neondatabase/serverless
-```
+\`\`\`
 
 ### Precio
 - **Desarrollo**: Gratis (Docker local)
@@ -262,9 +262,9 @@ npm install pg
 
 ### Opción A: @neondatabase/serverless (Recomendada)
 
-```bash
+\`\`\`bash
 npm install @neondatabase/serverless
-```
+\`\`\`
 
 **Pros:**
 - ✅ Serverless-first
@@ -277,9 +277,9 @@ npm install @neondatabase/serverless
 
 ### Opción B: pg (node-postgres)
 
-```bash
+\`\`\`bash
 npm install pg @types/pg
-```
+\`\`\`
 
 **Pros:**
 - ✅ Estándar de la industria
@@ -293,9 +293,9 @@ npm install pg @types/pg
 
 ### Opción C: Prisma ORM
 
-```bash
+\`\`\`bash
 npm install prisma @prisma/client
-```
+\`\`\`
 
 **Pros:**
 - ✅ Type-safe queries
@@ -310,9 +310,9 @@ npm install prisma @prisma/client
 
 ### Opción D: Drizzle ORM
 
-```bash
+\`\`\`bash
 npm install drizzle-orm drizzle-kit
-```
+\`\`\`
 
 **Pros:**
 - ✅ Type-safe
@@ -395,4 +395,3 @@ Marca lo que es importante para tu proyecto:
 - [Supabase Docs](https://supabase.com/docs)
 - [@neondatabase/serverless](https://github.com/neondatabase/serverless)
 - [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres)
-
