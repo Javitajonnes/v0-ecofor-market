@@ -69,6 +69,21 @@ export async function getUserById(id: string): Promise<UserFromDB | null> {
 }
 
 /**
+ * Obtener todos los usuarios
+ */
+export async function getAllUsers(includeInactive = false): Promise<UserFromDB[]> {
+  const sql = getSql()
+  
+  if (includeInactive) {
+    const result = await sql`SELECT * FROM users ORDER BY created_at DESC`
+    return result
+  } else {
+    const result = await sql`SELECT * FROM users WHERE is_active = true ORDER BY created_at DESC`
+    return result
+  }
+}
+
+/**
  * Verificar contraseña
  */
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
@@ -90,7 +105,7 @@ export async function createUser(data: {
   email: string
   password: string
   name: string
-  role: "retail" | "wholesale"
+  role: "admin" | "retail" | "wholesale"
   user_type: "person" | "company"
   rut: string
   phone?: string

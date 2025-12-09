@@ -122,8 +122,19 @@ export default function AdminPage() {
               <CardDescription>Administrar clientes y roles</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full" variant="outline">Ver Todos los Usuarios</Button>
-              <Button className="w-full">Crear Usuario</Button>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => router.push('/admin/users')}
+              >
+                Ver Todos los Usuarios
+              </Button>
+              <Button 
+                className="w-full"
+                onClick={() => router.push('/admin/users/new')}
+              >
+                Crear Usuario
+              </Button>
             </CardContent>
           </Card>
 
