@@ -6,8 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useStore } from '@/lib/store'
-import { Users, Plus, ArrowLeft, Mail, Phone, MapPin } from 'lucide-react'
+import { Users, Plus, ArrowLeft, Mail, Phone, MapPin, Edit, Trash2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface User {
   id: string
@@ -33,6 +43,9 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
   useEffect(() => {
     // Verificar admin access
@@ -85,6 +98,38 @@ export default function UsersPage() {
 
   const getUserTypeLabel = (userType: string) => {
     return userType === 'person' ? 'Persona' : 'Empresa'
+  }
+
+  const handleDeleteClick = (userItem: User) => {
+    setUserToDelete(userItem)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return
+
+    try {
+      setDeletingId(userToDelete.id)
+      const response = await fetch(`/api/users/${userToDelete.id}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        // Recargar la lista de usuarios
+        await fetchUsers()
+        setDeleteDialogOpen(false)
+        setUserToDelete(null)
+      } else {
+        setError(data.error || 'Error al eliminar usuario')
+        setDeleteDialogOpen(false)
+      }
+    } catch (err: any) {
+      setError('Error de conexión: ' + err.message)
+      setDeleteDialogOpen(false)
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   if (!user || user.role !== 'admin') {
@@ -194,6 +239,26 @@ export default function UsersPage() {
                             <span>Tipo: {getUserTypeLabel(userItem.user_type)}</span>
                           </CardDescription>
                         </div>
+                        <div className="flex gap-2">
+                          <Link href={`/admin/users/${userItem.id}/edit`}>
+                            <Button variant="outline" size="icon" title="Editar">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            title="Eliminar"
+                            onClick={() => handleDeleteClick(userItem)}
+                            disabled={deletingId === userItem.id}
+                          >
+                            {deletingId === userItem.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -240,6 +305,29 @@ export default function UsersPage() {
             )}
           </>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción marcará el usuario "{userToDelete?.name}" como inactivo.
+                El usuario no podrá iniciar sesión, pero se mantendrá en la base de datos.
+                ¿Deseas continuar?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   )

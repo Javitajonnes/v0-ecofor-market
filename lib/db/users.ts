@@ -141,6 +141,104 @@ export async function createUser(data: {
 }
 
 /**
+ * Actualizar usuario
+ */
+export async function updateUser(
+  id: string,
+  data: Partial<{
+    email: string
+    name: string
+    role: "admin" | "retail" | "wholesale"
+    user_type: "person" | "company"
+    rut: string
+    phone: string | null
+    address: string | null
+    city: string | null
+    region: string | null
+    company_name: string | null
+    is_active: boolean
+    email_verified: boolean
+  }>
+): Promise<UserFromDB | null> {
+  const sql = getSql()
+  
+  // Obtener usuario actual
+  const current = await sql`SELECT * FROM users WHERE id = ${id}`
+  if (!current[0]) return null
+  
+  const currentUser = current[0] as UserFromDB
+  
+  // Combinar datos actuales con los nuevos
+  const updated = {
+    email: data.email ?? currentUser.email,
+    name: data.name ?? currentUser.name,
+    role: data.role ? mapRoleToDB(data.role) : currentUser.role,
+    user_type: data.user_type ?? currentUser.user_type,
+    rut: data.rut ?? currentUser.rut,
+    phone: data.phone !== undefined ? data.phone : currentUser.phone,
+    address: data.address !== undefined ? data.address : currentUser.address,
+    city: data.city !== undefined ? data.city : currentUser.city,
+    region: data.region !== undefined ? data.region : currentUser.region,
+    company_name: data.company_name !== undefined ? data.company_name : currentUser.company_name,
+    is_active: data.is_active ?? currentUser.is_active,
+    email_verified: data.email_verified ?? currentUser.email_verified,
+  }
+  
+  const result = await sql`
+    UPDATE users SET
+      email = ${updated.email},
+      name = ${updated.name},
+      role = ${updated.role},
+      user_type = ${updated.user_type},
+      rut = ${updated.rut},
+      phone = ${updated.phone},
+      address = ${updated.address},
+      city = ${updated.city},
+      region = ${updated.region},
+      company_name = ${updated.company_name},
+      is_active = ${updated.is_active},
+      email_verified = ${updated.email_verified},
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ${id}
+    RETURNING *
+  `
+  
+  return result[0] || null
+}
+
+/**
+ * Actualizar contraseña de usuario
+ */
+export async function updateUserPassword(
+  id: string,
+  newPassword: string
+): Promise<boolean> {
+  const sql = getSql()
+  const passwordHash = await hashPassword(newPassword)
+  
+  const result = await sql`
+    UPDATE users 
+    SET password_hash = ${passwordHash}, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ${id}
+  `
+  
+  return result.count > 0
+}
+
+/**
+ * Eliminar usuario (soft delete - marca como inactivo)
+ */
+export async function deleteUser(id: string): Promise<boolean> {
+  const sql = getSql()
+  const result = await sql`
+    UPDATE users 
+    SET is_active = false, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ${id}
+  `
+  return result.count > 0
+}
+
+/**
  * Convertir usuario de BD a formato del frontend
  */
 export function formatUserForFrontend(user: UserFromDB): User {
