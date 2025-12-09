@@ -15,9 +15,9 @@ Sistema e-commerce B2B/B2C con gestión de roles, pedidos, cotizaciones y notifi
 
 ### Backend
 - **API**: Next.js API Routes (Route Handlers)
-- **Autenticación**: JWT con cookies HTTP-only
-- **Database Client**: `pg` (node-postgres) para desarrollo local, compatible con `@neondatabase/serverless` para producción
-- **Validación**: Zod schemas compartidos (pendiente implementación completa)
+- **Autenticación**: NextAuth.js v5 (Auth.js)
+- **ORM**: Direct SQL con `@neondatabase/serverless` (compatible PostgreSQL)
+- **Validación**: Zod schemas compartidos
 
 ### Base de Datos
 - **Motor**: PostgreSQL 15+
@@ -330,6 +330,32 @@ BLOB_READ_WRITE_TOKEN=vercel_blob_xxxxx
 5. Cliente acepta → Convierte en Order
 
 ## Seguridad
+
+### Flujo de Autenticación
+
+\`\`\`mermaid
+sequenceDiagram
+    participant C as Cliente (Navegador)
+    participant API as API Route (/api/auth/login)
+    participant DB as PostgreSQL (Neon)
+    
+    C->>API: POST { email, password }
+    API->>DB: SELECT * FROM users WHERE email = $1
+    DB-->>API: User data + password_hash
+    API->>API: bcrypt.compare(password, hash)
+    API->>API: JWT.sign(user)
+    API-->>C: { user, token }
+    C->>C: Update Zustand store
+    C->>C: Redirect based on role
+\`\`\`
+
+**Capas de Seguridad en Autenticación:**
+- Base de datos solo accesible desde API Routes (servidor)
+- Contraseñas hasheadas con bcrypt (10 rounds)
+- Tokens JWT con expiración de 7 días
+- Variables de entorno protegidas, no expuestas al cliente
+
+Para más detalles sobre la arquitectura de seguridad, ver [SECURITY.md](./SECURITY.md)
 
 ### Autenticación
 - Passwords hasheados con bcrypt (12 rounds)

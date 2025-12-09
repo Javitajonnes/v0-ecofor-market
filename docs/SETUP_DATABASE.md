@@ -9,9 +9,9 @@ Guía rápida para configurar PostgreSQL con Docker para desarrollo local.
 
 ## Paso 1: Iniciar PostgreSQL con Docker
 
-```bash
+\`\`\`bash
 docker-compose up -d
-```
+\`\`\`
 
 Esto iniciará:
 - PostgreSQL en `localhost:5432`
@@ -19,9 +19,9 @@ Esto iniciará:
 
 ## Paso 2: Verificar que esté corriendo
 
-```bash
+\`\`\`bash
 docker-compose ps
-```
+\`\`\`
 
 Deberías ver `ecofor_postgres` y `ecofor_pgadmin` corriendo.
 
@@ -29,11 +29,11 @@ Deberías ver `ecofor_postgres` y `ecofor_pgadmin` corriendo.
 
 Crea un archivo `.env.local` en la raíz del proyecto:
 
-```env
+\`\`\`env
 DATABASE_URL=postgresql://ecofor_user:ecofor_pass_2024@localhost:5432/ecoformarket
 JWT_SECRET=ecofor-market-secret-key-change-in-production
 NEXTAUTH_URL=http://localhost:3000
-```
+\`\`\`
 
 ## Paso 4: Ejecutar Migraciones
 
@@ -41,9 +41,9 @@ Las migraciones se ejecutan automáticamente al iniciar Docker por primera vez.
 
 **Para verificar que se aplicaron:**
 
-```bash
+\`\`\`bash
 npm run test:db
-```
+\`\`\`
 
 Este script verificará:
 - ✅ Conexión a la base de datos
@@ -52,28 +52,28 @@ Este script verificará:
 
 **Si las migraciones no se aplicaron automáticamente:**
 
-```bash
+\`\`\`bash
 npm run db:migrate
-```
+\`\`\`
 
 O manualmente:
 
-```bash
+\`\`\`bash
 # Schema inicial
 docker exec -i ecofor_postgres psql -U ecofor_user -d ecoformarket < scripts/migrations/001_initial_schema.sql
 
 # Datos de prueba
 docker exec -i ecofor_postgres psql -U ecofor_user -d ecoformarket < scripts/migrations/002_seed_data.sql
-```
+\`\`\`
 
 ## Paso 5: Verificar Conexión
 
-```bash
+\`\`\`bash
 npm run test:db
-```
+\`\`\`
 
 Deberías ver:
-```
+\`\`\`
 🔍 Verificando conexión a PostgreSQL...
 ✅ Conexión exitosa!
 📊 Verificando tabla users...
@@ -84,7 +84,7 @@ Deberías ver:
   - admin@ecoformarket.com (admin) - Administrador Sistema
   - cliente1@email.com (retail_client) - Juan Pérez
   ...
-```
+\`\`\`
 
 ## Usuarios de Prueba
 
@@ -98,17 +98,17 @@ Después de ejecutar las migraciones, puedes usar:
 
 ## Acceso Directo a PostgreSQL
 
-```bash
+\`\`\`bash
 docker exec -it ecofor_postgres psql -U ecofor_user -d ecoformarket
-```
+\`\`\`
 
 Comandos útiles dentro de psql:
-```sql
+\`\`\`sql
 \dt              -- Listar tablas
 \d users         -- Ver estructura de tabla users
 SELECT * FROM users;  -- Ver usuarios
 \q               -- Salir
-```
+\`\`\`
 
 ## Acceso a PgAdmin (Opcional)
 
@@ -130,47 +130,47 @@ SELECT * FROM users;  -- Ver usuarios
 **Problema**: Docker no está corriendo o PostgreSQL no inició.
 
 **Solución**:
-```bash
+\`\`\`bash
 docker-compose up -d
 docker-compose logs postgres
-```
+\`\`\`
 
 ### Error: "password authentication failed"
 
 **Problema**: Credenciales incorrectas en DATABASE_URL.
 
 **Solución**: Verifica que `.env.local` tenga:
-```
+\`\`\`
 DATABASE_URL=postgresql://ecofor_user:ecofor_pass_2024@localhost:5432/ecoformarket
-```
+\`\`\`
 
 ### Error: "relation does not exist"
 
 **Problema**: Las migraciones no se ejecutaron.
 
 **Solución**:
-```bash
+\`\`\`bash
 npm run db:migrate
-```
+\`\`\`
 
 ### Puerto 5432 ya en uso
 
 **Problema**: Ya tienes PostgreSQL corriendo en otro lugar.
 
 **Solución**: Cambiar puerto en `docker-compose.yml`:
-```yaml
+\`\`\`yaml
 ports:
   - "5433:5432"  # Cambiar a 5433
-```
+\`\`\`
 
 Y actualizar `.env.local`:
-```
+\`\`\`
 DATABASE_URL=postgresql://ecofor_user:ecofor_pass_2024@localhost:5433/ecoformarket
-```
+\`\`\`
 
 ## Comandos Útiles
 
-```bash
+\`\`\`bash
 # Iniciar servicios
 docker-compose up -d
 
@@ -191,7 +191,7 @@ docker exec ecofor_postgres pg_dump -U ecofor_user ecoformarket > backup.sql
 
 # Restaurar backup
 docker exec -i ecofor_postgres psql -U ecofor_user ecoformarket < backup.sql
-```
+\`\`\`
 
 ## Próximos Pasos
 
@@ -211,5 +211,3 @@ Cuando estés listo para producción:
 3. Ejecutar migraciones en Neon
 4. Actualizar `DATABASE_URL` en Vercel
 5. ¡Listo! El código funciona igual
-
-

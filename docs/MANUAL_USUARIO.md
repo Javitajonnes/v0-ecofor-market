@@ -651,4 +651,3 @@ EcoforMarket funciona mejor en:
 **Fin del Manual de Usuario**
 
 *Este documento fue generado automáticamente basado en la documentación técnica del proyecto EcoforMarket. Para actualizaciones o correcciones, contacta con el equipo de desarrollo.*
-
