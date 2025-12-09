@@ -100,8 +100,19 @@ export default function AdminPage() {
               <CardDescription>Administrar inventario y precios</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full" variant="outline">Ver Todos los Productos</Button>
-              <Button className="w-full">Agregar Nuevo Producto</Button>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => router.push('/admin/products')}
+              >
+                Ver Todos los Productos
+              </Button>
+              <Button 
+                className="w-full"
+                onClick={() => router.push('/admin/products/new')}
+              >
+                Agregar Nuevo Producto
+              </Button>
             </CardContent>
           </Card>
 
