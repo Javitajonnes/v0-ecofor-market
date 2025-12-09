@@ -6,8 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useStore } from '@/lib/store'
-import { Package, Plus, Edit, Trash2, ArrowLeft } from 'lucide-react'
+import { Package, Plus, Edit, Trash2, ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface Product {
   id: string
@@ -33,6 +43,9 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
 
   useEffect(() => {
     // Verificar admin access
@@ -76,6 +89,38 @@ export default function ProductsPage() {
       month: 'short',
       day: 'numeric'
     })
+  }
+
+  const handleDeleteClick = (product: Product) => {
+    setProductToDelete(product)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete) return
+
+    try {
+      setDeletingId(productToDelete.id)
+      const response = await fetch(`/api/products/${productToDelete.id}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        // Recargar la lista de productos
+        await fetchProducts()
+        setDeleteDialogOpen(false)
+        setProductToDelete(null)
+      } else {
+        setError(data.error || 'Error al eliminar producto')
+        setDeleteDialogOpen(false)
+      }
+    } catch (err: any) {
+      setError('Error de conexión: ' + err.message)
+      setDeleteDialogOpen(false)
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   if (!user || user.role !== 'admin') {
@@ -176,11 +221,23 @@ export default function ProductsPage() {
                           </CardDescription>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="icon" title="Editar">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="icon" title="Eliminar">
-                            <Trash2 className="h-4 w-4" />
+                          <Link href={`/admin/products/${product.id}/edit`}>
+                            <Button variant="outline" size="icon" title="Editar">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            title="Eliminar"
+                            onClick={() => handleDeleteClick(product)}
+                            disabled={deletingId === product.id}
+                          >
+                            {deletingId === product.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </div>
@@ -226,6 +283,29 @@ export default function ProductsPage() {
             )}
           </>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción marcará el producto "{productToDelete?.name}" como inactivo.
+                El producto no se mostrará en el catálogo público, pero se mantendrá en la base de datos.
+                ¿Deseas continuar?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   )
