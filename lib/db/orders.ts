@@ -255,6 +255,78 @@ export async function getOrderStats() {
 }
 
 /**
+ * Obtener pedidos de un usuario específico
+ */
+export async function getUserOrders(userId: string, includeCancelled = false): Promise<OrderWithItems[]> {
+  const sql = getSql()
+  
+  let ordersQuery
+  if (includeCancelled) {
+    ordersQuery = sql`
+      SELECT 
+        o.*,
+        u.name as user_name,
+        u.email as user_email
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      WHERE o.user_id = ${userId}
+      ORDER BY o.created_at DESC
+    `
+  } else {
+    ordersQuery = sql`
+      SELECT 
+        o.*,
+        u.name as user_name,
+        u.email as user_email
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      WHERE o.user_id = ${userId}
+      AND o.status != 'cancelled'
+      ORDER BY o.created_at DESC
+    `
+  }
+  
+  const orders = await ordersQuery
+  
+  // Obtener items para cada pedido
+  const ordersWithItems: OrderWithItems[] = []
+  
+  for (const order of orders) {
+    const itemsQuery = sql`
+      SELECT 
+        oi.*,
+        p.name as product_name,
+        p.sku as product_sku,
+        p.image_url as product_image
+      FROM order_items oi
+      JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = ${order.id}
+      ORDER BY oi.created_at
+    `
+    
+    const items = await itemsQuery
+    
+    ordersWithItems.push({
+      ...order,
+      items: items.map((item: any) => ({
+        id: item.id,
+        order_id: item.order_id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: Number(item.unit_price),
+        subtotal: Number(item.subtotal),
+        created_at: item.created_at,
+        product_name: item.product_name,
+        product_sku: item.product_sku,
+        product_image: item.product_image
+      }))
+    })
+  }
+  
+  return ordersWithItems
+}
+
+/**
  * Actualizar estado de pedido
  */
 export async function updateOrderStatus(

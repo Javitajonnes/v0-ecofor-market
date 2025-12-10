@@ -97,7 +97,7 @@ export function Header() {
                     <DropdownMenuItem onClick={() => router.push('/profile')}>
                       Mi Perfil
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/orders')}>
                       Mis Pedidos
                     </DropdownMenuItem>
                     {user?.role === 'admin' && (

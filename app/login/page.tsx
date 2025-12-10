@@ -121,9 +121,9 @@ export default function LoginPage() {
             {/* Test Credentials Info */}
             <div className="rounded-lg bg-muted p-3 text-xs space-y-1">
               <p className="font-semibold text-muted-foreground">Usuarios de prueba:</p>
-              <p>Admin: admin@ecoformarket.com / Admin123!</p>
-              <p>Minorista: cliente1@email.com / Admin123!</p>
-              <p>Mayorista: empresa1@email.com / Admin123!</p>
+              <p>Admin: admin@ecoformarket.com / admin123</p>
+              <p>Minorista: cliente1@email.com / cliente123</p>
+              <p>Mayorista: empresa1@email.com / empresa123</p>
             </div>
           </CardContent>
 
