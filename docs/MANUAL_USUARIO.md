@@ -1,8 +1,8 @@
 # Manual de Usuario - EcoforMarket
 ## Plataforma de E-commerce Ecológico B2B/B2C
 
-**Versión:** 1.0  
-**Fecha:** Noviembre 2024  
+**Versión:** 2.0  
+**Fecha:** Diciembre 2024  
 **Plataforma:** EcoforMarket - Productos Sostenibles
 
 ---
@@ -347,15 +347,49 @@ El panel del carrito muestra:
 
 1. Haz clic en el **icono de usuario** (esquina superior derecha)
 2. Si estás autenticado, verás tu nombre y email
-3. Selecciona **"Mi Perfil"** (cuando esté disponible)
+3. Selecciona **"Mi Perfil"** del menú desplegable
+4. Serás redirigido a la página de perfil (`/profile`)
 
 ### Información del Perfil
 
-Tu perfil muestra:
-- **Nombre Completo**
-- **Correo Electrónico**
-- **Tipo de Cliente**: Minorista o Mayorista
-- **Rol**: Se muestra en el header cuando estás autenticado
+Tu perfil muestra y permite editar:
+- **Nombre Completo**: Puedes actualizar tu nombre
+- **Correo Electrónico**: Puedes cambiar tu email (debe ser único)
+- **RUT**: Solo lectura (no se puede modificar, contacta con un administrador)
+- **Teléfono**: Información de contacto opcional
+- **Dirección**: Dirección de envío
+- **Ciudad y Región**: Ubicación
+- **Nombre de Empresa**: Si tu cuenta es tipo empresa
+- **Rol de Usuario**: Solo lectura (no se puede modificar, contacta con un administrador)
+
+### Editar tu Perfil
+
+#### Actualizar Información Personal
+
+1. Accede a tu perfil desde el menú de usuario
+2. Modifica los campos que deseas cambiar:
+   - Nombre completo
+   - Correo electrónico
+   - Teléfono
+   - Dirección, ciudad y región
+   - Nombre de empresa (si aplica)
+3. Haz clic en **"Guardar Cambios"**
+4. Verás un mensaje de confirmación si la actualización fue exitosa
+
+**⚠️ Notas Importantes:**
+- El RUT no se puede modificar. Si necesitas cambiarlo, contacta con un administrador.
+- El rol de usuario no se puede modificar. Solo un administrador puede cambiar tu rol.
+- Si cambias tu email, asegúrate de que no esté en uso por otro usuario.
+
+#### Cambiar Contraseña
+
+1. En la página de perfil, desplázate hasta la sección **"Seguridad"**
+2. Marca la casilla **"Cambiar contraseña"**
+3. Ingresa tu **nueva contraseña** (mínimo 6 caracteres)
+4. Confirma la contraseña ingresándola nuevamente
+5. Haz clic en **"Guardar Cambios"**
+
+**⚠️ Importante:** La contraseña debe tener al menos 6 caracteres y ambas contraseñas deben coincidir.
 
 ### Ver Mis Pedidos
 
@@ -397,42 +431,189 @@ El panel de administración muestra:
 
 ### Gestión de Productos
 
-**⚠️ Nota:** La funcionalidad completa de gestión de productos está en desarrollo.
+#### Ver Todos los Productos
 
-**Cuando esté disponible:**
-1. Desde el panel, haz clic en **"Ver Todos los Productos"** o **"Agregar Nuevo Producto"**
-2. Podrás:
-   - Ver lista de productos
-   - Agregar nuevos productos
-   - Editar productos existentes
-   - Eliminar productos
-   - Actualizar precios y stock
+1. Desde el panel de administración, haz clic en **"Ver Todos los Productos"**
+2. Serás redirigido a la página de gestión de productos (`/admin/products`)
+3. Verás una lista completa de todos los productos con:
+   - Nombre y SKU del producto
+   - Categoría y marca
+   - Precios (retail y wholesale)
+   - Stock disponible
+   - Estado (activo/inactivo, destacado)
+4. Puedes ver el total de productos, activos e inactivos en la parte superior
+
+#### Agregar Nuevo Producto
+
+1. Desde el panel de administración, haz clic en **"Agregar Nuevo Producto"**
+2. O desde la lista de productos, haz clic en el botón correspondiente
+3. Serás redirigido al formulario de creación (`/admin/products/new`)
+4. Completa todos los campos requeridos:
+   - **Nombre del Producto** (requerido)
+   - **Descripción**
+   - **Categoría** (requerido)
+   - **Marca**
+   - **SKU** (requerido, debe ser único)
+   - **Precio Retail** (requerido, debe ser positivo)
+   - **Precio Wholesale** (requerido, debe ser positivo)
+   - **Stock** (cantidad disponible)
+   - **URL de Imagen**
+   - **Peso** (en kg)
+   - **Dimensiones**
+   - **Destacado**: Marca si el producto debe aparecer destacado
+   - **Activo**: Marca si el producto está disponible para venta
+5. Haz clic en **"Crear Producto"**
+6. Verás un mensaje de confirmación y serás redirigido a la lista de productos
+
+**⚠️ Validaciones:**
+- El SKU debe ser único (no puede haber dos productos con el mismo SKU)
+- Los precios deben ser números positivos
+- El stock debe ser un número entero no negativo
+
+#### Editar Producto
+
+1. Desde la lista de productos (`/admin/products`), localiza el producto que deseas editar
+2. Haz clic en el botón **"Editar"** (icono de lápiz) en la tarjeta del producto
+3. Serás redirigido al formulario de edición (`/admin/products/[id]/edit`)
+4. Modifica los campos que necesites
+5. Haz clic en **"Guardar Cambios"**
+6. Verás un mensaje de confirmación y serás redirigido a la lista de productos
+
+**⚠️ Nota:** Al editar, el SKU debe seguir siendo único. Si intentas usar un SKU que ya existe en otro producto, recibirás un error.
+
+#### Eliminar Producto
+
+1. Desde la lista de productos, localiza el producto que deseas eliminar
+2. Haz clic en el botón **"Eliminar"** (icono de papelera)
+3. Se abrirá un diálogo de confirmación
+4. Confirma la eliminación haciendo clic en **"Eliminar"** en el diálogo
+5. El producto será marcado como inactivo (soft delete) y desaparecerá de la lista activa
+
+**⚠️ Importante:** La eliminación es "soft delete", lo que significa que el producto no se borra permanentemente de la base de datos, solo se marca como inactivo. Esto permite recuperar el producto si es necesario.
 
 ### Gestión de Usuarios
 
-**⚠️ Nota:** La funcionalidad completa de gestión de usuarios está en desarrollo.
+#### Ver Todos los Usuarios
 
-**Cuando esté disponible:**
-1. Desde el panel, haz clic en **"Ver Todos los Usuarios"** o **"Crear Usuario"**
-2. Podrás:
-   - Ver lista de usuarios
-   - Crear nuevos usuarios
-   - Editar información de usuarios
-   - Cambiar roles de usuarios
-   - Desactivar usuarios
+1. Desde el panel de administración, haz clic en **"Ver Todos los Usuarios"**
+2. Serás redirigido a la página de gestión de usuarios (`/admin/users`)
+3. Verás una lista completa de todos los usuarios con:
+   - Nombre y email
+   - RUT
+   - Tipo de usuario (Persona o Empresa)
+   - Rol (Administrador, Cliente Minorista, Cliente Mayorista)
+   - Estado (Activo/Inactivo)
+   - Email verificado
+   - Información de contacto (teléfono, dirección)
+   - Fechas de creación y actualización
+4. Puedes ver el total de usuarios, activos, inactivos y administradores en la parte superior
+
+#### Crear Nuevo Usuario
+
+1. Desde el panel de administración, haz clic en **"Crear Usuario"**
+2. O desde la lista de usuarios, haz clic en el botón **"Crear Usuario"**
+3. Serás redirigido al formulario de creación (`/admin/users/new`)
+4. Completa todos los campos requeridos:
+   - **Nombre Completo** (requerido)
+   - **Correo Electrónico** (requerido, debe ser único)
+   - **RUT** (requerido, debe ser válido)
+   - **Tipo de Usuario**: Persona o Empresa (requerido)
+   - **Rol**: Administrador, Cliente Minorista o Cliente Mayorista (requerido)
+   - **Contraseña** (requerido, mínimo 6 caracteres)
+   - **Confirmar Contraseña** (requerido, debe coincidir)
+   - **Teléfono** (opcional)
+   - **Dirección, Ciudad, Región** (opcionales)
+   - **Nombre de Empresa** (requerido si el tipo es Empresa)
+5. Haz clic en **"Crear Usuario"**
+6. Verás un mensaje de confirmación y serás redirigido a la lista de usuarios
+
+**⚠️ Validaciones:**
+- El email debe ser único (no puede haber dos usuarios con el mismo email)
+- El RUT debe ser válido según el formato chileno
+- La contraseña debe tener al menos 6 caracteres
+- Si el tipo de usuario es "Empresa", el nombre de la empresa es requerido
+
+#### Editar Usuario
+
+1. Desde la lista de usuarios (`/admin/users`), localiza el usuario que deseas editar
+2. Haz clic en el botón **"Editar"** (icono de lápiz) en la tarjeta del usuario
+3. Serás redirigido al formulario de edición (`/admin/users/[id]/edit`)
+4. Modifica los campos que necesites:
+   - Puedes cambiar nombre, email, teléfono, dirección, etc.
+   - Puedes cambiar el rol del usuario
+   - Puedes cambiar el tipo de usuario
+   - Puedes marcar/desmarcar "Usuario Activo" y "Email Verificado"
+   - Puedes cambiar la contraseña (opcional, marca "Cambiar contraseña")
+5. Haz clic en **"Guardar Cambios"**
+6. Verás un mensaje de confirmación y serás redirigido a la lista de usuarios
+
+**⚠️ Notas Importantes:**
+- Al cambiar el email, debe seguir siendo único
+- Puedes cambiar la contraseña del usuario marcando "Cambiar contraseña"
+- Puedes activar/desactivar usuarios marcando/desmarcando "Usuario Activo"
+
+#### Eliminar Usuario
+
+1. Desde la lista de usuarios, localiza el usuario que deseas eliminar
+2. Haz clic en el botón **"Eliminar"** (icono de papelera)
+3. Se abrirá un diálogo de confirmación
+4. Confirma la eliminación haciendo clic en **"Eliminar"** en el diálogo
+5. El usuario será marcado como inactivo (soft delete) y desaparecerá de la lista activa
+
+**⚠️ Importante:** 
+- La eliminación es "soft delete", lo que significa que el usuario no se borra permanentemente de la base de datos, solo se marca como inactivo
+- **No puedes eliminar tu propio usuario** por seguridad
+- Los usuarios eliminados no podrán iniciar sesión, pero sus datos se mantienen en la base de datos
 
 ### Gestión de Pedidos
 
-**⚠️ Nota:** La funcionalidad completa de gestión de pedidos está en desarrollo.
+#### Ver Todos los Pedidos
 
-**Cuando esté disponible:**
-1. Desde el panel, haz clic en **"Ver Todos los Pedidos"**
-2. Podrás:
-   - Ver todos los pedidos del sistema
-   - Filtrar por cliente, fecha o estado
-   - Actualizar estado de pedidos
-   - Ver detalles de cada pedido
-   - Generar reportes
+1. Desde el panel de administración, haz clic en **"Ver Todos los Pedidos"**
+2. Serás redirigido a la página de gestión de pedidos (`/admin/orders`)
+3. Verás una lista completa de todos los pedidos con:
+   - **Número de Pedido**: Identificador único del pedido
+   - **Estado**: Pendiente, Confirmado, En Proceso, Enviado, Entregado o Cancelado
+   - **Cliente**: Nombre y email del usuario que realizó el pedido
+   - **Fecha de Creación**: Cuándo se creó el pedido
+   - **Monto Total**: Total del pedido en pesos chilenos
+   - **Dirección de Envío**: Dirección completa de entrega
+   - **Productos**: Lista de productos con cantidades y precios
+   - **Método de Pago**: Forma de pago utilizada
+   - **Timeline**: Fechas de confirmación, envío y entrega (si aplican)
+
+4. **Filtros Disponibles:**
+   - **Incluir pedidos cancelados**: Marca esta opción para ver también los pedidos cancelados
+
+**Estados de Pedido:**
+- **Pendiente**: Pedido creado, esperando confirmación
+- **Confirmado**: Pedido confirmado y en proceso
+- **En Proceso**: Pedido siendo preparado
+- **Enviado**: Pedido enviado al cliente
+- **Entregado**: Pedido entregado exitosamente
+- **Cancelado**: Pedido cancelado
+
+#### Reportes y Estadísticas
+
+1. Desde el panel de administración, haz clic en **"Reportes"**
+2. O desde la página de pedidos, haz clic en **"Ver Reportes"**
+3. Serás redirigido a la página de reportes (`/admin/orders/reports`)
+4. Verás las siguientes estadísticas:
+
+**Resumen General:**
+- **Total de Pedidos**: Número total de pedidos en el sistema
+- **Total de Ventas**: Suma total de todos los pedidos (excluyendo cancelados)
+- **Ventas del Mes**: Total de ventas del mes actual
+- **Últimos 7 Días**: Pedidos y ventas de la última semana
+
+**Distribución por Estado:**
+- Verás cuántos pedidos hay en cada estado (Pendiente, Confirmado, En Proceso, Enviado, Entregado, Cancelado)
+
+**Productos Más Vendidos:**
+- Top 10 productos más vendidos de los últimos 30 días
+- Muestra nombre del producto, SKU, cantidad vendida e ingresos generados
+
+**⚠️ Nota:** Las estadísticas se actualizan en tiempo real basándose en los datos de la base de datos.
 
 ### Actividad Reciente
 
@@ -596,9 +777,19 @@ Para problemas técnicos o consultas sobre el uso de la plataforma:
 
 ### Versión del Manual
 
-- **Versión**: 1.0
-- **Fecha de Actualización**: Noviembre 2024
-- **Plataforma**: EcoforMarket v1.0
+- **Versión**: 2.0
+- **Fecha de Actualización**: Diciembre 2024
+- **Plataforma**: EcoforMarket v2.0
+
+### Cambios en esta Versión
+
+**Nuevas Funcionalidades:**
+- ✅ Gestión completa de perfil de usuario (editar información, cambiar contraseña)
+- ✅ Gestión completa de productos en panel admin (crear, editar, eliminar)
+- ✅ Gestión completa de usuarios en panel admin (crear, editar, eliminar)
+- ✅ Gestión completa de pedidos en panel admin (ver todos los pedidos)
+- ✅ Sistema de reportes y estadísticas de pedidos
+- ✅ Visualización detallada de pedidos con items y timeline
 
 ### Notas Importantes
 
