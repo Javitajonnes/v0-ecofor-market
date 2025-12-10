@@ -144,8 +144,19 @@ export default function AdminPage() {
               <CardDescription>Gestionar y procesar pedidos</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full" variant="outline">Ver Todos los Pedidos</Button>
-              <Button className="w-full">Reportes</Button>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => router.push('/admin/orders')}
+              >
+                Ver Todos los Pedidos
+              </Button>
+              <Button 
+                className="w-full"
+                onClick={() => router.push('/admin/orders/reports')}
+              >
+                Reportes
+              </Button>
             </CardContent>
           </Card>
         </div>
